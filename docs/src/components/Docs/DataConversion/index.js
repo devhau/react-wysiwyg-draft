@@ -111,6 +111,6 @@ export default () => (
     />
     <h3>Markdown</h3>
     <div className="docs-desc top-margined">
-    /div>
+    </div>
   </div>
 );
