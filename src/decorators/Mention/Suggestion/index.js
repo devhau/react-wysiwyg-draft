@@ -79,18 +79,17 @@ class Suggestion {
             });
             this.idTimeoutSuggest = undefined;
           }, (timeoutSuggestion ?? 0) > 400 ? timeoutSuggestion : 400);
-          const suggestionPresent = getSuggestions()?.some(suggestion => {
-            if (suggestion.value) {
-              if (caseSensitive) {
-                return suggestion.value.indexOf(mentionText) >= 0;
-              }
-              return (
-                suggestion.value
-                  .toLowerCase()
-                  .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-              );
+          const checkText = (text, mentionText, caseSensitive) => {
+            if (caseSensitive) {
+              return text.toString().indexOf(mentionText) >= 0;
+            } else {
+              text.toString()
+                .toLowerCase()
+                .indexOf(mentionText && mentionText.toLowerCase()) >= 0
             }
-            return false;
+          }
+          const suggestionPresent = getSuggestions()?.some(suggestion => {
+            return checkText(suggestion.value, mentionText, caseSensitive) || checkText(suggestion.text, mentionText, caseSensitive)
           });
           if (suggestionPresent) {
             callback(index === 0 ? 0 : index + 1, text.length);
