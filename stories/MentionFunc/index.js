@@ -31,6 +31,7 @@ const MentionFunc = () => {
         canceltrigger:true,
         suggestions: () => suggestions,
         func: (mentionText, caseSensitive, callBack) => {
+          console.log(mentionText);
           setTimeout(() => {
             setSuggestions(data.filter(suggestion => {
               if (!mentionText || mentionText.length === 0) {
@@ -45,9 +46,9 @@ const MentionFunc = () => {
                   .indexOf(mentionText && mentionText.toLowerCase()) >= 0
               );
             }));
-            // refEditor.current.modalHandler.setFilteredSuggestions(suggestions);
-            // callBack && callBack(suggestions);
-          },0);
+            refEditor.current.modalHandler.setFilteredSuggestions(suggestions);
+           // callBack && callBack(suggestions);
+          },2000);
 
         }
       }}

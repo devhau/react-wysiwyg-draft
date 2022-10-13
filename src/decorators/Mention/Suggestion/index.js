@@ -35,6 +35,9 @@ class Suggestion {
       modalHandler,
     };
   }
+
+  idTimeoutSuggest = undefined;
+
   findSuggestionEntities = (contentBlock, callback) => {
     if (this.config.getEditorState()) {
       const {
@@ -44,6 +47,7 @@ class Suggestion {
         triggerChangeSuggestions,
         getSuggestions,
         caseSensitive,
+        timeoutSuggestion
       } = this.config;
       const selection = getEditorState().getSelection();
       if (
@@ -65,11 +69,16 @@ class Suggestion {
         }
         if (index >= 0) {
           const mentionText = text.substr(index + preText.length, text.length);
-          setTimeout(() => {
+          if (this.idTimeoutSuggest) {
+            clearTimeout(this.idTimeoutSuggest);
+            this.idTimeoutSuggest = undefined;
+          }
+          this.idTimeoutSuggest = setTimeout(() => {
             triggerChangeSuggestions?.()?.(mentionText, caseSensitive, (data) => {
               this.config.modalHandler.setFilteredSuggestions(data);
             });
-          });
+            this.idTimeoutSuggest = undefined;
+          }, (timeoutSuggestion ?? 0) > 400 ? timeoutSuggestion : 400);
           const suggestionPresent = getSuggestions()?.some(suggestion => {
             if (suggestion.value) {
               if (caseSensitive) {
@@ -146,8 +155,7 @@ function getSuggestionComponent() {
       const { children } = this.props;
       if (children !== props.children) {
 
-        if (!canceltrigger)
-          this.filterSuggestions(props);
+        this.filterSuggestions(props);
         this.setState({
           showSuggestions: true,
         });
@@ -221,6 +229,7 @@ function getSuggestionComponent() {
     filteredSuggestions = [];
 
     filterSuggestions = props => {
+      if (canceltrigger) return;
       const mentionText = props.children[0].props.text.substr(1);
       setTimeout(() => {
         triggerChangeSuggestions?.()?.(mentionText, config.caseSensitive);
