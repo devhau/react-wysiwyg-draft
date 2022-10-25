@@ -1,11 +1,24 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import addMention from '../addMention';
-import KeyDownHandler from '../../../event-handler/keyDown';
-import SuggestionHandler from '../../../event-handler/suggestions';
-import './styles.css';
-
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import classNames from "classnames";
+import addMention from "../addMention";
+import KeyDownHandler from "../../../event-handler/keyDown";
+import SuggestionHandler from "../../../event-handler/suggestions";
+import "./styles.css";
+const checkText = (text, mentionText, caseSensitive) => {
+  if (!text) return false;
+  if (caseSensitive) {
+    return !mentionText || text.toString().indexOf(mentionText) >= 0;
+  } else {
+    return (
+      !mentionText ||
+      text
+        .toString()
+        .toLowerCase()
+        .indexOf(mentionText && mentionText.toLowerCase()) >= 0
+    );
+  }
+};
 class Suggestion {
   constructor(config) {
     const {
@@ -47,19 +60,19 @@ class Suggestion {
         triggerChangeSuggestions,
         getSuggestions,
         caseSensitive,
-        timeoutSuggestion
+        timeoutSuggestion,
       } = this.config;
       const selection = getEditorState().getSelection();
       if (
-        selection.get('anchorKey') === contentBlock.get('key') &&
-        selection.get('anchorKey') === selection.get('focusKey')
+        selection.get("anchorKey") === contentBlock.get("key") &&
+        selection.get("anchorKey") === selection.get("focusKey")
       ) {
         let text = contentBlock.getText();
         text = text.substr(
           0,
-          selection.get('focusOffset') === text.length - 1
+          selection.get("focusOffset") === text.length - 1
             ? text.length
-            : selection.get('focusOffset') + 1
+            : selection.get("focusOffset") + 1
         );
         let index = text.lastIndexOf(separator + trigger);
         let preText = separator + trigger;
@@ -69,27 +82,28 @@ class Suggestion {
         }
         if (index >= 0) {
           const mentionText = text.substr(index + preText.length, text.length);
+          let timeoutSuggestionTemp =
+            (timeoutSuggestion ?? 0) > 400 ? timeoutSuggestion : 400;
           if (this.idTimeoutSuggest) {
             clearTimeout(this.idTimeoutSuggest);
             this.idTimeoutSuggest = undefined;
           }
           this.idTimeoutSuggest = setTimeout(() => {
-            triggerChangeSuggestions?.()?.(mentionText, caseSensitive, (data) => {
-              this.config.modalHandler.setFilteredSuggestions(data);
-            });
+            triggerChangeSuggestions?.()?.(
+              mentionText,
+              caseSensitive,
+              (data) => {
+                this.config.modalHandler.setFilteredSuggestions(data);
+              }
+            );
             this.idTimeoutSuggest = undefined;
-          }, (timeoutSuggestion ?? 0) > 400 ? timeoutSuggestion : 400);
-          const checkText = (text, mentionText, caseSensitive) => {
-            if (caseSensitive) {
-              return text.toString().indexOf(mentionText) >= 0;
-            } else {
-              text.toString()
-                .toLowerCase()
-                .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-            }
-          }
-          const suggestionPresent = getSuggestions()?.some(suggestion => {
-            return checkText(suggestion.value, mentionText, caseSensitive) || checkText(suggestion.text, mentionText, caseSensitive)
+          }, timeoutSuggestionTemp);
+
+          const suggestionPresent = getSuggestions()?.some((suggestion) => {
+            return (
+              checkText(suggestion.value, mentionText, caseSensitive) ||
+              checkText(suggestion.text, mentionText, caseSensitive)
+            );
           });
           if (suggestionPresent) {
             callback(index === 0 ? 0 : index + 1, text.length);
@@ -119,7 +133,7 @@ function getSuggestionComponent() {
       style: { left: 15 },
       activeOption: -1,
       showSuggestions: true,
-      flg: false
+      flg: false,
     };
 
     componentDidMount() {
@@ -147,13 +161,14 @@ function getSuggestionComponent() {
       KeyDownHandler.registerCallBack(this.onEditorKeyDown);
       SuggestionHandler.open();
       config.modalHandler.setSuggestionCallback(this.closeSuggestionDropdown);
-      config.modalHandler.setFilteredSuggestionsCallback(this.setFilteredSuggestions.bind(this));
+      config.modalHandler.setFilteredSuggestionsCallback(
+        this.setFilteredSuggestions.bind(this)
+      );
       this.filterSuggestions(this.props);
     }
     componentDidUpdate(props) {
       const { children } = this.props;
       if (children !== props.children) {
-
         this.filterSuggestions(props);
         this.setState({
           showSuggestions: true,
@@ -173,33 +188,33 @@ function getSuggestionComponent() {
       config.modalHandler.removeFilteredSuggestionsCallback();
     }
 
-    onEditorKeyDown = event => {
+    onEditorKeyDown = (event) => {
       const { activeOption } = this.state;
       const newState = {};
-      if (event.key === 'ArrowDown') {
+      if (event.key === "ArrowDown") {
         event.preventDefault();
         if (activeOption === this.filteredSuggestions.length - 1) {
           newState.activeOption = 0;
         } else {
           newState.activeOption = activeOption + 1;
         }
-      } else if (event.key === 'ArrowUp') {
+      } else if (event.key === "ArrowUp") {
         if (activeOption <= 0) {
           newState.activeOption = this.filteredSuggestions.length - 1;
         } else {
           newState.activeOption = activeOption - 1;
         }
-      } else if (event.key === 'Escape') {
+      } else if (event.key === "Escape") {
         newState.showSuggestions = false;
         SuggestionHandler.close();
-      } else if (event.key === 'Enter') {
+      } else if (event.key === "Enter") {
         this.addMention();
       }
       this.setState(newState);
     };
 
-    onOptionMouseEnter = event => {
-      const index = event.target.getAttribute('data-index');
+    onOptionMouseEnter = (event) => {
+      const index = event.target.getAttribute("data-index");
       this.setState({
         activeOption: index,
       });
@@ -211,11 +226,11 @@ function getSuggestionComponent() {
       });
     };
 
-    setSuggestionReference = ref => {
+    setSuggestionReference = (ref) => {
       this.suggestion = ref;
     };
 
-    setDropdownReference = ref => {
+    setDropdownReference = (ref) => {
       this.dropdown = ref;
     };
 
@@ -227,25 +242,22 @@ function getSuggestionComponent() {
 
     filteredSuggestions = [];
 
-    filterSuggestions = props => {
+    filterSuggestions = (props) => {
       if (canceltrigger) return;
       const mentionText = props.children[0].props.text.substr(1);
       setTimeout(() => {
         triggerChangeSuggestions?.()?.(mentionText, config.caseSensitive);
       });
-      this.filteredSuggestions = (getSuggestions()?.filter(suggestion => {
-        if (!mentionText || mentionText.length === 0) {
-          return true;
-        }
-        if (config.caseSensitive) {
-          return suggestion.value.indexOf(mentionText) >= 0;
-        }
-        return (
-          suggestion.value
-            .toLowerCase()
-            .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-        );
-      })) ?? [];
+      this.filteredSuggestions =
+        getSuggestions()?.filter((suggestion) => {
+          if (!mentionText || mentionText.length === 0) {
+            return true;
+          }
+          return (
+            checkText(suggestion.value, mentionText, config.caseSensitive) ||
+            checkText(suggestion.text, mentionText, config.caseSensitive)
+          );
+        }) ?? [];
     };
 
     addMention = () => {
@@ -274,7 +286,7 @@ function getSuggestionComponent() {
           {showSuggestions && (
             <span
               className={classNames(
-                'rdw-suggestion-dropdown',
+                "rdw-suggestion-dropdown",
                 dropdownClassName
               )}
               contentEditable="false"
@@ -291,9 +303,9 @@ function getSuggestionComponent() {
                   onMouseEnter={this.onOptionMouseEnter}
                   onMouseLeave={this.onOptionMouseLeave}
                   className={classNames(
-                    'rdw-suggestion-option',
+                    "rdw-suggestion-option",
                     optionClassName,
-                    { 'rdw-suggestion-option-active': index === activeOption }
+                    { "rdw-suggestion-option-active": index === activeOption }
                   )}
                 >
                   {suggestion.text}

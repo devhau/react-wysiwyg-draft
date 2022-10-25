@@ -7,14 +7,14 @@ import "./styles.css";
 
 export default class Home extends Component {
   componentDidMount() {
-    const script = document.createElement("script");
-    script.id = "_carbonads_js";
-    script.type = "text/javascript";
-    script.src =
-      "//cdn.carbonads.com/carbon.js?serve=CEBIP5Q7&placement=devhaugithubio";
-    script.async = true;
+    // const script = document.createElement("script");
+    // script.id = "_carbonads_js";
+    // script.type = "text/javascript";
+    // script.src =
+    //   "//cdn.carbonads.com/carbon.js?serve=CEBIP5Q7&placement=devhaugithubio";
+    // script.async = true;
 
-    document.getElementById("carbon_ad").appendChild(script);
+    // document.getElementById("carbon_ad").appendChild(script);
   }
 
   render() {

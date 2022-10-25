@@ -4,14 +4,14 @@ import React, { useRef, useState } from 'react';
 import { Editor } from '../../src';
 
 let data = [
-  { text: 'APPLE', value: 'apple', url: 'apple' },
-  { text: 'BANANA', value: 'banana', url: 'banana' },
-  { text: 'CHERRY', value: 'cherry', url: 'cherry' },
-  { text: 'DURIAN', value: 'durian', url: 'durian' },
-  { text: 'EGGFRUIT', value: 'eggfruit', url: 'eggfruit' },
-  { text: 'FIG', value: 'fig', url: 'fig' },
-  { text: 'GRAPEFRUIT', value: 'grapefruit', url: 'grapefruit' },
-  { text: 'HONEYDEW', value: 'honeydew', url: 'honeydew' },
+  { text: 'APPLE', value: 1 },
+  { text: 'BANANA', value: 2},
+  { text: 'CHERRY', value: 3 },
+  { text: 'DURIAN', value:4 },
+  { text: 'EGGFRUIT', value:5 },
+  { text: 'FIG', value: 6, url: 'fig' },
+  { text: 'GRAPEFRUIT', value: 7, url: 'grapefruit' },
+  { text: 'HONEYDEW', value: 8, url: 'honeydew' },
 ];
 /**
  * Default trigger is '@' and default separator between words is ' '.
@@ -32,24 +32,23 @@ const MentionFunc = () => {
         suggestions: () => suggestions,
         func: (mentionText, caseSensitive, callBack) => {
           console.log(mentionText);
-          setTimeout(() => {
-            setSuggestions(data.filter(suggestion => {
-              if (!mentionText || mentionText.length === 0) {
-                return true;
-              }
-              if (caseSensitive) {
-                return suggestion.value.indexOf(mentionText) >= 0;
-              }
-              return (
-                suggestion.value
-                  .toLowerCase()
-                  .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-              );
-            }));
-            refEditor.current.modalHandler.setFilteredSuggestions(suggestions);
-           // callBack && callBack(suggestions);
-          },2000);
-
+          setSuggestions(data.filter(suggestion => {
+            if (!mentionText || mentionText.length === 0) {
+              return true;
+            }
+            if (caseSensitive) {
+              return suggestion.value.toString().indexOf(mentionText) >= 0||suggestion.text.toString().indexOf(mentionText) >= 0;
+            }
+            return (
+              suggestion.value.toString()
+                .toLowerCase()
+                .indexOf(mentionText && mentionText.toLowerCase()) >= 0||suggestion.text.toString()
+                .toLowerCase()
+                .indexOf(mentionText && mentionText.toLowerCase()) >= 0
+            );
+          }));
+         // refEditor.current.modalHandler.setFilteredSuggestions(suggestions);
+         callBack && callBack(suggestions);
         }
       }}
       toolbarClassName="rdw-storybook-toolbar"
