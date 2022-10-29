@@ -1,4 +1,4 @@
-# React Draft Wysiwyg
+# React Wysiwyg Draft
 
 A Wysiwyg editor built using ReactJS and DraftJS libraries.
 [Demo Page](https://devhau.github.io/react-wysiwyg-draft).
